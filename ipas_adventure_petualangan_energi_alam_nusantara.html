@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPAS Adventure: Petualangan Energi & Alam Nusantara</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Fredoka', 'Inter', sans-serif;
+            user-select: none;
+        }
+        .game-card {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+        }
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-bounce-slow {
+            animation: bounce-slow 2s infinite ease-in-out;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6)); }
+            50% { filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.9)); }
+        }
+        .animate-glow {
+            animation: pulse-glow 2.5s infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-emerald-950 via-slate-900 to-teal-950 min-h-screen text-white flex flex-col items-center justify-center p-4">
+
+    <div id="app" class="w-full max-w-4xl bg-slate-900/95 backdrop-blur-md rounded-3xl border-4 border-emerald-500 overflow-hidden game-card flex flex-col min-h-[640px]">
+        
+        <!-- Top Status Bar -->
+        <div id="status-bar" class="bg-slate-950/95 px-6 py-3 border-b-2 border-emerald-500/50 flex flex-wrap items-center justify-between gap-4 hidden">
+            <div class="flex items-center gap-3">
+                <span id="player-avatar" class="text-3xl bg-emerald-500/20 p-2 rounded-2xl border border-emerald-400 animate-bounce-slow">🌿</span>
+                <div>
+                    <h3 id="current-world-title" class="text-sm font-bold text-emerald-400">Bab 1: Mengubah Bentuk Energi</h3>
+                    <p id="current-stage-name" class="text-xs text-slate-300">Peta Nusantara</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 text-sm font-bold flex-wrap">
+                <div class="bg-red-500/20 border border-red-500 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-red-300">
+                    <span>❤️</span> <span id="stat-lives">3</span>
+                </div>
+                <div class="bg-amber-500/20 border border-amber-500 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-amber-300">
+                    <span>🪙</span> <span id="stat-coins">0</span>
+                </div>
+                <div class="bg-emerald-600/20 border border-emerald-600 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-emerald-300">
+                    <span>⭐</span> <span id="stat-xp">0</span> XP
+                </div>
+                <button onclick="toggleAudio()" id="audio-btn" class="bg-slate-800 border border-slate-600 px-3 py-1.5 rounded-full hover:bg-slate-700 transition cursor-pointer">🔊</button>
+            </div>
+        </div>
+
+        <!-- Screen Container -->
+        <div id="screen-container" class="flex-1 flex flex-col items-center justify-center p-6 text-center relative overflow-y-auto">
+            
+            <!-- START SCREEN -->
+            <div id="screen-start" class="flex flex-col items-center justify-center space-y-6 max-w-lg mx-auto py-8">
+                <div class="text-6xl animate-glow">🌍</div>
+                <h1 class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-300">
+                    IPAS Adventure: Penjelajah Nusantara
+                </h1>
+                <p class="text-slate-300 text-base md:text-lg">
+                    Bergabunglah dengan Biko si Beruang Madu Pintar dan Prof. Rimba menjelajahi energi, gaya, peta, dan iklim untuk menyelamatkan kelestarian alam Nusantara!
+                </p>
+
+                <!-- Username Input Section -->
+                <div class="bg-slate-800/90 p-5 rounded-2xl border border-emerald-500/40 text-left w-full space-y-2 shadow-inner">
+                    <label for="username-input" class="block font-bold text-emerald-400 text-sm">✨ Masukkan Nama Penjelajah / Siswa:</label>
+                    <input type="text" id="username-input" placeholder="Ketik nama panggilanmu di sini..." maxlength="20" class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-400 rounded-xl px-4 py-3 text-white placeholder-slate-500 text-sm outline-none transition" />
+                    <p id="username-error" class="text-xs text-rose-400 hidden">Nama penjelajah wajib diisi sebelum memulai misi!</p>
+                </div>
+
+                <div class="bg-slate-800/80 p-4 rounded-2xl border border-emerald-500/30 text-left w-full space-y-2 text-sm text-slate-300">
+                    <p class="font-bold text-emerald-400">✨ Misi Bab Semester 1:</p>
+                    <p>⚡ Bab 1: Mengubah Bentuk Energi & Fotosintesis (Soal 1-13)</p>
+                    <p>🧲 Bab 2: Gaya di Sekitar Kita & Manfaatnya (Soal 14-25)</p>
+                    <p>🗺️ Bab 3: Peta & Bentang Alam Daerahku (Soal 26-38)</p>
+                    <p>🌦️ Bab 4: Iklim, Musim & Efek Rumah Kaca (Soal 39-50)</p>
+                </div>
+                <button onclick="startGame()" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xl rounded-2xl shadow-lg transform transition active:scale-95 cursor-pointer">
+                    Mulai Petualangan! 🚀
+                </button>
+            </div>
+
+            <!-- STORY SCREEN -->
+            <div id="screen-story" class="hidden w-full max-w-xl flex flex-col items-center space-y-6 py-6">
+                <div class="relative bg-slate-800 border-2 border-emerald-500 rounded-3xl p-6 w-full text-left shadow-xl">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div id="story-speaker-avatar" class="text-5xl bg-slate-950 p-3 rounded-2xl border border-emerald-400">🐻</div>
+                        <div>
+                            <h4 id="story-speaker-name" class="font-bold text-lg text-emerald-300">Biko si Beruang Madu</h4>
+                            <p class="text-xs text-emerald-300/80">Mentor Pendamping</p>
+                        </div>
+                    </div>
+                    <p id="story-dialogue-text" class="text-slate-200 text-lg leading-relaxed min-h-[90px] bg-slate-900/60 p-4 rounded-2xl border border-slate-700">
+                        Halo penjelajah! Mari kita selesaikan misi ini bersama-sama!
+                    </p>
+                </div>
+                <button onclick="nextStoryStep()" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 font-bold text-lg rounded-xl shadow-lg transition transform active:scale-95 cursor-pointer">
+                    Lanjutkan Perjalanan ➡️
+                </button>
+            </div>
+
+            <!-- QUIZ SCREEN -->
+            <div id="screen-quiz" class="hidden w-full max-w-2xl flex flex-col items-center space-y-6 py-4">
+                <div class="w-full flex items-center justify-between text-xs text-slate-400 bg-slate-800/60 px-4 py-2 rounded-xl border border-slate-700">
+                    <span id="quiz-progress-text">Soal 1 dari 50</span>
+                    <span id="quiz-category-tag" class="bg-emerald-500/30 text-emerald-300 px-2.5 py-1 rounded-md font-semibold">Bab 1: Energi</span>
+                </div>
+
+                <!-- Mascot Speech Box -->
+                <div class="flex items-center gap-3 bg-slate-800/80 border border-slate-700 px-4 py-2 rounded-2xl w-full">
+                    <span id="mascot-avatar-quiz" class="text-3xl animate-bounce-slow">🌿</span>
+                    <p id="mascot-speech" class="text-sm text-slate-200 italic font-medium">"Pilih jawaban IPAS yang paling tepat!"</p>
+                </div>
+
+                <!-- Question Box -->
+                <div class="bg-slate-800 border-2 border-emerald-500/50 rounded-3xl p-6 w-full shadow-lg text-left">
+                    <h3 id="quiz-question" class="text-lg md:text-xl font-bold text-white mb-6 leading-relaxed">
+                        Pertanyaan akan muncul di sini...
+                    </h3>
+                    
+                    <div id="quiz-options" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Options generated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Explanation Box -->
+                <div id="quiz-explanation-box" class="hidden w-full bg-slate-950/95 border-2 border-emerald-500/80 rounded-2xl p-4 text-left space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 id="explanation-title" class="font-bold text-emerald-400 text-base">✨ Hebat, Benar!</h4>
+                        <span id="explanation-reward" class="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-full font-bold">+25 XP | +10 Koin</span>
+                    </div>
+                    <p id="explanation-text" class="text-sm text-slate-300 leading-relaxed">Penjelasan materi...</p>
+                    <button id="next-action-btn" onclick="proceedAfterAnswer()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 font-bold rounded-xl text-white shadow transition cursor-pointer">
+                        Lanjut Misi 🚀
+                    </button>
+                </div>
+            </div>
+
+            <!-- GAME OVER SCREEN -->
+            <div id="screen-gameover" class="hidden flex flex-col items-center space-y-6 max-w-xl mx-auto py-6">
+                <div class="text-6xl animate-bounce-slow">💔</div>
+                <h2 class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-orange-500 to-amber-400">
+                    NYAWA HABIS! MISI DIULANG
+                </h2>
+                <p class="text-slate-200">
+                    Jangan menyerah, Penjelajah! Alam Nusantara butuh ketekunanmu. Ayo coba lagi dari awal!
+                </p>
+                
+                <div class="w-full bg-slate-800/90 p-6 rounded-3xl border border-red-500/50 text-left space-y-3">
+                    <div class="flex justify-between items-center bg-slate-900/80 p-3 rounded-xl">
+                        <span class="text-sm text-slate-400">Posisi Terakhir</span>
+                        <span id="gameover-progress" class="text-sm font-bold text-emerald-300">Soal 1 dari 50</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-900/80 p-3 rounded-xl">
+                        <span class="text-sm text-slate-400">Koin Terkumpul</span>
+                        <span id="gameover-coins" class="text-sm font-bold text-amber-400">0</span>
+                    </div>
+                </div>
+
+                <button onclick="resetGame()" class="w-full py-4 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-black text-lg rounded-2xl shadow-lg transition cursor-pointer">
+                    Coba Lagi dari Awal 🔄
+                </button>
+            </div>
+
+            <!-- VICTORY SCREEN -->
+            <div id="screen-victory" class="hidden flex flex-col items-center space-y-6 max-w-xl mx-auto py-6">
+                <div class="text-6xl animate-bounce-slow">🏆</div>
+                <h2 class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-400 to-cyan-300">
+                    MISI SELESAI! PAHLAWAN NUSANTARA!
+                </h2>
+                <p class="text-slate-200">
+                    Luar biasa! Kamu telah menguasai seluruh 50 soal IPAS Semester 1 dari energi, gaya, peta, hingga iklim dengan gemilang!
+                </p>
+                
+                <div class="grid grid-cols-2 gap-4 w-full bg-slate-800/90 p-6 rounded-3xl border border-emerald-500/50 text-left">
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-700">
+                        <p class="text-xs text-slate-400">Total XP</p>
+                        <p id="final-xp" class="text-2xl font-black text-emerald-400">0</p>
+                    </div>
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-700">
+                        <p class="text-xs text-slate-400">Koin Bintang</p>
+                        <p id="final-coins" class="text-2xl font-black text-amber-400">0</p>
+                    </div>
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-700">
+                        <p class="text-xs text-slate-400">Jawaban Benar</p>
+                        <p id="final-correct" class="text-2xl font-black text-teal-400">0 / 50</p>
+                    </div>
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-700">
+                        <p class="text-xs text-slate-400">Gelar Penghargaan</p>
+                        <p class="text-sm font-bold text-yellow-300">🌟 Ahli IPAS Sejati</p>
+                    </div>
+                </div>
+
+                <button onclick="resetGame()" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-lg rounded-2xl shadow-lg transition cursor-pointer">
+                    Main Lagi 🔄
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            username: "Penjelajah",
+            lives: 3,
+            coins: 0,
+            xp: 0,
+            currentQuestionIndex: 0,
+            correctCount: 0,
+            audioEnabled: true
+        };
+
+        const chapters = [
+            { id: 1, name: "Bab 1: Mengubah Bentuk Energi", topic: "Energi & Fotosintesis", startIdx: 0, endIdx: 13, icon: "⚡" },
+            { id: 2, name: "Bab 2: Gaya di Sekitar Kita", topic: "Macam-macam Gaya & Manfaatnya", startIdx: 13, endIdx: 25, icon: "🧲" },
+            { id: 3, name: "Bab 3: Di Sini Tempat Tinggalku!", topic: "Peta & Bentang Alam", startIdx: 25, endIdx: 38, icon: "🗺️" },
+            { id: 4, name: "Bab 4: Iklim dan Perubahannya", topic: "Musim, Iklim, & Rumah Kaca", startIdx: 38, endIdx: 50, icon: "🌦️" }
+        ];
+
+        const questionsDatabase = [
+            { q: "Apa yang dimaksud dengan energi?", options: ["Kemampuan untuk melakukan kerja atau usaha", "Benda yang bisa dimakan sehari-hari", "Alat ukur berat benda", "Waktu untuk tidur malam"], correct: 0, explanation: "Energi adalah kemampuan untuk melakukan kerja atau usaha." },
+            { q: "Perubahan energi apa yang terjadi pada baterai yang menyalakan senter?", options: ["Kimia menjadi listrik lalu cahaya", "Gerak menjadi panas", "Listrik menjadi suara", "Cahaya menjadi bunyi"], correct: 0, explanation: "Baterai menyimpan energi kimia yang diubah menjadi energi listrik lalu menjadi cahaya." },
+            { q: "Kipas angin listrik mengubah energi listrik menjadi energi...", options: ["Gerak", "Bunyi", "Kimia", "Panas tinggi"], correct: 0, explanation: "Kipas angin mengubah energi listrik menjadi energi gerak." },
+            { q: "Alat rumah tangga yang mengubah energi listrik menjadi energi panas adalah...", options: ["Setrika", "Kipas angin", "Radio", "Lampu senter"], correct: 0, explanation: "Setrika mengubah energi listrik menjadi energi panas untuk merapikan pakaian." },
+            { q: "Apa proses pembuatan makanan pada tumbuhan hijau yang dibantu cahaya matahari disebut?", options: ["Fotosintesis", "Respirasi", "Evaporasi", "Kondensasi"], correct: 0, explanation: "Fotosintesis adalah proses tumbuhan membuat makanan menggunakan cahaya matahari." },
+            { q: "Zat hijau daun yang sangat penting dalam proses fotosintesis dinamakan...", options: ["Klorofil", "Oksigen", "Karbondioksida", "Kalsium"], correct: 0, explanation: "Klorofil adalah pigmen hijau daun yang menangkap cahaya matahari." },
+            { q: "Hasil utama dari proses fotosintesis tumbuhan adalah...", options: ["Makanan (glukosa) dan oksigen", "Air dan karbon monoksida", "Minyak bumi dan gas", "Batu dan garam"], correct: 0, explanation: "Fotosintesis menghasilkan glukosa sebagai makanan tumbuhan dan oksigen untuk bernapas." },
+            { q: "Gas yang diserap oleh tumbuhan dari udara untuk fotosintesis adalah...", options: ["Karbon dioksida (CO2)", "Oksigen (O2)", "Nitrogen", "Hidrogen"], correct: 0, explanation: "Tumbuhan menyerap karbon dioksida dari udara melalui stomata." },
+            { q: "Mengapa manusia perlu mengubah bentuk energi dalam kehidupan sehari-hari?", options: ["Agar energi dapat dimanfaatkan sesuai kebutuhan", "Karena energi bisa habis diciptakan", "Supaya energi hilang begitu saja", "Agar bumi menjadi gelap"], correct: 0, explanation: "Manusia mengubah bentuk energi agar dapat dimanfaatkannya untuk berbagai peralatan." },
+            { q: "Sumber energi utama di bumi kita adalah...", options: ["Matahari", "Batu bara", "Angin", "Air laut"], correct: 0, explanation: "Matahari adalah sumber energi terbesar dan utama di bumi." },
+            { q: "Energi yang dihasilkan oleh aliran air terjun dapat dimanfaatkan untuk...", options: ["Pembangkit listrik tenaga air (PLTA)", "Menyalakan kompor minyak", "Menerangi kamar tidur tanpa lampu", "Memasak kue bolu"], correct: 0, explanation: "Aliran air menggerakkan turbin pada PLTA untuk menghasilkan listrik." },
+            { q: "Panel surya di atap rumah berfungsi untuk mengubah energi matahari menjadi...", options: ["Energi listrik", "Energi bunyi", "Energi gerak roda", "Energi uap"], correct: 0, explanation: "Panel surya menyerap cahaya matahari dan mengubahnya menjadi energi listrik." },
+            { q: "Ketika kita membakar kayu, terjadi perubahan energi kimia menjadi energi...", options: ["Panas dan cahaya", "Gerak dan listrik", "Bunyi dan angin", "Magnet"], correct: 0, explanation: "Pembakaran kayu menghasilkan energi panas (hangat) dan cahaya api." },
+
+            { q: "Apa yang dimaksud dengan gaya dalam ilmu IPAS?", options: ["Tarikan atau dorongan yang diberikan pada suatu benda", "Kecepatan mobil di jalan raya", "Berat badan seseorang", "Suhu udara di pegunungan"], correct: 0, explanation: "Gaya adalah tarikan atau dorongan yang dapat memengaruhi keadaan benda." },
+            { q: "Gaya otot digunakan ketika kita melakukan aktivitas seperti...", options: ["Mendorong meja atau mengangkat buku", "Menjemur pakaian di bawah terik matahari", "Melihat peta di dinding kelas", "Menghitung angka matematika"], correct: 0, explanation: "Gaya otot berasal dari tenaga tubuh kita untuk mendorong atau mengangkat." },
+            { q: "Gaya yang timbul karena sentuhan dua permukaan benda disebut gaya...", options: ["Gesek", "Magnet", "Gravitasi", "Listrik"], correct: 0, explanation: "Gaya gesek terjadi ketika dua permukaan benda saling bersentuhan." },
+            { q: "Gaya apa yang membuat semua benda di bumi jatuh ke bawah?", options: ["Gaya gravitasi bumi", "Gaya otot", "Gaya pegas", "Gaya magnet"], correct: 0, explanation: "Gaya gravitasi bumi menarik benda-benda ke arah pusat bumi." },
+            { q: "Benda yang dapat ditarik oleh magnet terbuat dari bahan...", options: ["Besi atau baja", "Plastik lunak", "Kayu kering", "Kertas karton"], correct: 0, explanation: "Magnet dapat menarik benda logam magnetis seperti besi dan baja." },
+            { q: "Apa manfaat gaya gesek dalam kehidupan sehari-hari?", options: ["Membuat ban kendaraan tidak mudah tergelincir di jalan", "Membuat lantai rumah menjadi sangat licin", "Membuat pensil tidak bisa menulis di buku", "Membuat mainan terbang bebas"], correct: 0, explanation: "Gaya gesek antara ban dan jalan mencegah kendaraan tergelincir." },
+            { q: "Gaya pegas dapat ditemukan pada benda yang bersifat...", options: ["Lentur dan dapat kembali ke bentuk semula", "Kaku dan mudah pecah", "Cair seperti air", "Gas di dalam balon"], correct: 0, explanation: "Gaya pegas terdapat pada karet gelang, per, atau busur panah." },
+            { q: "Jika kita melempar bola ke atas, lama-kelamaan bola akan turun kembali karena adanya...", options: ["Gaya gravitasi", "Gaya dorong angin", "Gaya gesek udara saja", "Gaya magnet kuat"], correct: 0, explanation: "Gaya gravitasi bumi menarik kembali bola yang dilempar ke atas." },
+            { q: "Pengaruh gaya terhadap benda dapat berupa...", options: ["Mengubah bentuk, arah, atau kecepatan benda", "Membuat benda hilang selamanya", "Menambah jumlah berat benda secara ajaib", "Mengubah warna cat benda"], correct: 0, explanation: "Gaya dapat mengubah bentuk benda, mengubah arah gerak, serta mempercepat atau menghentikan benda." },
+            { q: "Bagaimana cara memperkecil gaya gesek yang terlalu besar pada roda gerobak?", options: ["Memberikan pelumas atau roda pada bagian yang bergesekan", "Menambahkan pasir kasar di as", "Menyeretnya di atas batu tajam", "Mengecat permukaan dengan cat tembok"], correct: 0, explanation: "Pelumas mengurangi gesekan langsung antarpermukaan." },
+            { q: "Manfaat gaya magnet dalam kehidupan sehari-hari dapat dilihat pada...", options: ["Kompas penunjuk arah utara-selatan", "Gantungan baju kain biasa", "Sendok makan di meja", "Gelas kaca minum"], correct: 0, explanation: "Jarum kompas menggunakan gaya magnet bumi untuk menunjukkan arah." },
+            { q: "Kegiatan berikut yang memanfaatkan gaya dorong adalah...", options: ["Membuka laci meja dengan menariknya", "Mendorong gerobak belanja di supermarket", "Mengangkat tas sekolah ke punggung", "Memakai kaos kaki sekolah"], correct: 0, explanation: "Mendorong gerobak adalah contoh pemberian gaya dorong." },
+
+            { q: "Apa yang dimaksud dengan peta?", options: ["Gambar permukaan bumi pada bidang datar dengan skala tertentu", "Foto udara manusia dari pesawat terbang", "Buku cerita rakyat nusantara", "Kumpulan rumus matematika"], correct: 0, explanation: "Peta adalah representasi gambaran permukaan bumi pada bidang datar." },
+            { q: "Kumpulan simbol pada peta yang menjelaskan arti gambar atau warna disebut...", options: ["Legenda atau keterangan peta", "Judul peta utama", "Skala jarak peta", "Garis lintang bumi"], correct: 0, explanation: "Legenda peta berisi daftar simbol dan arti warna yang digunakan pada peta." },
+            { q: "Pada umumnya, warna hijau pada peta menunjukkan bentang alam berupa...", options: ["Dataran rendah", "Gunung tinggi", "Lautan luas", "Gurun pasir"], correct: 0, explanation: "Warna hijau pada peta mewakili wilayah dataran rendah." },
+            { q: "Warna biru pada peta biasanya digunakan untuk menggambarkan...", options: ["Perairan (laut, sungai, danau)", "Pegunungan kapur", "Hutan lebat", "Kota besar"], correct: 0, explanation: "Warna biru melambangkan wilayah perairan seperti laut dan sungai." },
+            { q: "Apa yang dimaksud dengan bentang alam?", options: ["Pemukaan bumi yang dibentuk oleh alam secara alami", "Bangunan rumah dan gedung buatan manusia", "Jalan raya beraspal di kota", "Kendaraan bermotor di jalan"], correct: 0, explanation: "Bentang alam adalah pemandangan alam atau bentuk permukaan bumi alami." },
+            { q: "Contoh bentang alam berupa daratan tinggi adalah...", options: ["Dataran tinggi dan pegunungan", "Selat dan teluk", "Laut dan rawa", "Samudra luas"], correct: 0, explanation: "Dataran tinggi, pegunungan, dan bukit adalah contoh bentang alam daratan." },
+            { q: "Bagian perairan darat yang mengalir dari hulu ke hilir disebut...", options: ["Sungai", "Laut", "Selat", "Samudra"], correct: 0, explanation: "Sungai adalah aliran air tawar yang mengalir dari daratan tinggi ke laut." },
+            { q: "Laut yang terletak di antara dua pulau besar disebut...", options: ["Selat", "Teluk", "Danau", "Rawa"], correct: 0, explanation: "Selat adalah laut sempit yang menghubungkan dua pulau." },
+            { q: "Arah mata angin utama pada kompas dan peta terdiri dari...", options: ["Utara, Selatan, Timur, Barat", "Kanan, Kiri, Atas, Bawah", "Pagi, Siang, Sore, Malam", "Hujan, Panas, Dingin, Semi"], correct: 0, explanation: "Empat arah mata angin utama adalah Utara, Selatan, Timur, dan Barat." },
+            { q: "Matahari terbit dari arah...", options: ["Timur", "Barat", "Utara", "Selatan"], correct: 0, explanation: "Matahari selalu terbit di sebelah timur setiap pagi." },
+            { q: "Untuk mengetahui perbandingan jarak pada peta dengan jarak sebenarnya di lapangan, kita melihat...", options: ["Skala peta", "Judul peta", "Warna peta", "Garis tepi"], correct: 0, explanation: "Skala peta menunjukkan perbandingan jarak pada peta dan jarak aslinya." },
+            { q: "Wilayah daratan yang menjorok ke laut dinamakan...", options: ["Tanjung", "Teluk", "Selat", "Nusa"], correct: 0, explanation: "Tanjung adalah daratan yang menjorok ke arah laut." },
+            { q: "Apa manfaat utama menggunakan peta dalam kehidupan sehari-hari?", options: ["Membantu menunjukkan arah dan letak suatu tempat", "Menghitung jumlah uang belanja", "Mengukur suhu udara luar rumah", "Mengetahui resep masakan ibu"], correct: 0, explanation: "Peta membantu kita menemukan lokasi dan menavigasi perjalanan." },
+
+            { q: "Negara Indonesia terletak di garis khatulistiwa sehingga memiliki iklim...", options: ["Tropis (dua musim)", "Subtropis (empat musim)", "Dingin bersalju abadi", "Gurun kering sepanjang tahun"], correct: 0, explanation: "Indonesia beriklim tropis dengan dua musim yaitu kemarau dan penghujan." },
+            { q: "Dua musim utama yang ada di negara Indonesia adalah...", options: ["Musim kemarau dan musim hujan", "Musim semi dan musim gugur", "Musim dingin dan musim panas salju", "Musim badai dan musim angin"], correct: 0, explanation: "Indonesia mengalami musim kemarau dan musim hujan secara bergantian." },
+            { q: "Apa perbedaan utama antara cuaca dan iklim?", options: ["Cuaca diamati dalam waktu singkat, iklim dalam waktu yang sangat lama", "Cuaca hanya di gunung, iklim di laut", "Tidak ada perbedaan sama sekali", "Cuaca untuk hewan, iklim untuk tumbuhan"], correct: 0, explanation: "Cuaca bersifat singkat dan berubah-ubah, sedangkan iklim diamati dalam jangka waktu panjang (puluhan tahun)." },
+            { q: "Apa yang dimaksud dengan efek rumah kaca di bumi?", options: ["Perangkap panas di atmosfer oleh gas rumah kaca", "Rumah kaca petani untuk tanaman hias", "Pendingin ruangan raksasa di kota", "Pantulan cahaya bulan di malam hari"], correct: 0, explanation: "Efek rumah kaca adalah proses terperangkapnya panas matahari oleh gas di atmosfer bumi." },
+            { q: "Contoh gas rumah kaca di udara yang memicu pemanasan global adalah...", options: ["Karbon dioksida (CO2) dan metana", "Oksigen murni", "Air bersih", "Nitrogen cair"], correct: 0, explanation: "Karbon dioksida dan gas metana merupakan gas rumah kaca utama." },
+            { q: "Apa dampak dari peningkatan gas karbon dioksida berlebih di sekitar kita?", options: ["Pemanasan global dan perubahan iklim ekstrem", "Udara semakin sejuk dan segar", "Salju turun merata di seluruh Indonesia", "Tanaman tumbuh subur tanpa batas"], correct: 0, explanation: "Kelebihan gas karbon dioksida memerangkap panas berlebih sehingga bumi semakin panas." },
+            { q: "Kegiatan manusia yang dapat meningkatkan jumlah gas karbon dioksida di udara adalah...", options: ["Asap kendaraan bermotor dan pembakaran hutan", "Menanam pohon di halaman rumah", "Bersepeda ke sekolah setiap hari", "Menghemat penggunaan listrik lampu"], correct: 0, explanation: "Asap kendaraan dan pembakaran menyumbang banyak gas karbon dioksida." },
+            { q: "Bagaimana cara kita ikut serta mengurangi dampak pemanasan global?", options: ["Menanam pohon dan merawat tanaman di sekitar", "Membakar sampah plastik di pekarangan", "Sering menebang pohon hutan sembarangan", "Membiarkan lampu menyala sepanjang hari"], correct: 0, explanation: "Pohon menyerap karbon dioksida dan menghasilkan oksigen segar." },
+            { q: "Apa ciri-ciri saat wilayah Indonesia mengalami musim kemarau?", options: ["Curah hujan sangat jarang dan matahari bersinar terik", "Hujan turun terus-menerus setiap hari", "Suhu udara sangat dingin bersalju", "Sungai meluap dan banjir di mana-mana"], correct: 0, explanation: "Musim kemarau ditandai cuaca panas dan curah hujan yang rendah." },
+            { q: "Angin musim yang membawa uap air sehingga menyebabkan musim hujan di Indonesia disebut angin...", options: ["Muson barat", "Muson timur", "Angin darat", "Angin laut"], correct: 0, explanation: "Angin muson barat membawa banyak uap air dari Samudra Hindia ke Indonesia." },
+            { q: "Mengapa penting bagi kita untuk menjaga kelestarian lingkungan dan mengurangi polusi?", options: ["Agar iklim bumi tetap seimbang dan layak huni", "Supaya bumi cepat hancur", "Agar suhu udara semakin panas membakar", "Agar tidak ada tumbuhan yang hidup"], correct: 0, explanation: "Menjaga lingkungan menjaga keseimbangan ekosistem dan iklim bumi." },
+            { q: "Tantangan Akhir Pengepul Alam: 'Manakah kombinasi yang benar tentang energi, gaya, peta, dan iklim di Indonesia?'", options: ["Energi matahari untuk fotosintesis, gaya otot mendorong benda, peta menggunakan legenda, dan Indonesia beriklim tropis", "Semua energi berasal dari batu bara es", "Peta menggunakan warna hijau untuk laut dalam", "Indonesia memiliki empat musim salju"], correct: 0, explanation: "Pernyataan pertama merangkum seluruh esensi materi IPAS Semester 1 dengan sempurna!" }
+        ];
+
+        function startGame() {
+            const usernameInput = document.getElementById('username-input');
+            const usernameError = document.getElementById('username-error');
+            
+            const enteredName = usernameInput ? usernameInput.value.trim() : "";
+            if (enteredName === "") {
+                if (usernameError) usernameError.classList.remove('hidden');
+                if (usernameInput) usernameInput.focus();
+                return;
+            }
+
+            gameState.username = enteredName;
+            if (usernameError) usernameError.classList.add('hidden');
+
+            const screenStart = document.getElementById('screen-start');
+            const statusBar = document.getElementById('status-bar');
+            if (screenStart) screenStart.classList.add('hidden');
+            if (statusBar) statusBar.classList.remove('hidden');
+            
+            const avatarEl = document.getElementById('player-avatar');
+            if (avatarEl) {
+                avatarEl.title = gameState.username;
+            }
+
+            showStoryIntro(0);
+        }
+
+        function showStoryIntro(chapterIndex) {
+            hideAllScreens();
+            const screenStory = document.getElementById('screen-story');
+            if (screenStory) screenStory.classList.remove('hidden');
+            
+            const chap = chapters[chapterIndex];
+            const worldTitleEl = document.getElementById('current-world-title');
+            const stageNameEl = document.getElementById('current-stage-name');
+            if (worldTitleEl) worldTitleEl.innerText = chap.name;
+            if (stageNameEl) stageNameEl.innerText = chap.topic;
+            
+            let dialogue = "";
+            let speaker = "Biko si Beruang Madu";
+            let avatar = "🐻";
+
+            if (chapterIndex === 0) {
+                dialogue = `Halo ${gameState.username}! Selamat datang di Bab 1. Kita akan menjelajahi keajaiban energi dan proses fotosintesis tumbuhan!`;
+            } else if (chapterIndex === 1) {
+                dialogue = `Kerja bagus ${gameState.username}! Sekarang kita memasuki Bab 2: Mengenal berbagai bentuk gaya dan manfaatnya di sekitar kita!`;
+                avatar = "🧲";
+                speaker = "Prof. Rimba";
+            } else if (chapterIndex === 2) {
+                dialogue = `Hebat ${gameState.username}! Lanjutkan ke Bab 3: Membaca peta Nusantara dan mengenali bentang alam daerah kita!`;
+                avatar = "🗺️";
+                speaker = "Kiki si Burung Elang";
+            } else if (chapterIndex === 3) {
+                dialogue = `Luar biasa ${gameState.username}! Ini adalah Bab terakhir (Bab 4): Menjelajahi iklim, musim, dan menjaga bumi dari efek rumah kaca!`;
+                avatar = "🌦️";
+                speaker = "Penjaga Alam";
+            }
+
+            const speakerNameEl = document.getElementById('story-speaker-name');
+            const speakerAvatarEl = document.getElementById('story-speaker-avatar');
+            const dialogueTextEl = document.getElementById('story-dialogue-text');
+
+            if (speakerNameEl) speakerNameEl.innerText = speaker;
+            if (speakerAvatarEl) speakerAvatarEl.innerText = avatar;
+            if (dialogueTextEl) dialogueTextEl.innerText = dialogue;
+        }
+
+        function nextStoryStep() {
+            startQuizForCurrentChapter();
+        }
+
+        function startQuizForCurrentChapter() {
+            hideAllScreens();
+            const screenQuiz = document.getElementById('screen-quiz');
+            if (screenQuiz) screenQuiz.classList.remove('hidden');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (gameState.currentQuestionIndex >= questionsDatabase.length) {
+                showVictoryScreen();
+                return;
+            }
+
+            const q = questionsDatabase[gameState.currentQuestionIndex];
+            
+            let currentChapObj = chapters.find(c => gameState.currentQuestionIndex >= c.startIdx && gameState.currentQuestionIndex < c.endIdx);
+            if (!currentChapObj) currentChapObj = chapters[3];
+
+            const worldTitleEl = document.getElementById('current-world-title');
+            if (worldTitleEl) worldTitleEl.innerText = currentChapObj.name;
+
+            const stageNameEl = document.getElementById('current-stage-name');
+            if (stageNameEl) stageNameEl.innerText = currentChapObj.topic;
+
+            const progressTextEl = document.getElementById('quiz-progress-text');
+            if (progressTextEl) progressTextEl.innerText = `Soal ${gameState.currentQuestionIndex + 1} dari 50`;
+
+            const categoryTagEl = document.getElementById('quiz-category-tag');
+            if (categoryTagEl) categoryTagEl.innerText = currentChapObj.name;
+
+            const questionEl = document.getElementById('quiz-question');
+            if (questionEl) questionEl.innerText = q.q;
+
+            const explanationBox = document.getElementById('quiz-explanation-box');
+            if (explanationBox) explanationBox.classList.add('hidden');
+            
+            const optionsContainer = document.getElementById('quiz-options');
+            if (optionsContainer) {
+                optionsContainer.innerHTML = '';
+
+                q.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full text-left p-4 bg-slate-900/80 hover:bg-emerald-900/50 border border-slate-700 hover:border-emerald-400 rounded-2xl font-medium text-slate-200 transition transform active:scale-95 cursor-pointer";
+                    btn.innerText = `${String.fromCharCode(65 + idx)}. ${opt}`;
+                    btn.onclick = () => handleAnswer(idx);
+                    optionsContainer.appendChild(btn);
+                });
+            }
+
+            const mascotSpeech = document.getElementById('mascot-speech');
+            if (mascotSpeech) mascotSpeech.innerText = `"Pilih jawaban IPAS yang paling tepat!"`;
+
+            const mascotAvatar = document.getElementById('mascot-avatar-quiz');
+            if (mascotAvatar) mascotAvatar.innerText = "🌿";
+        }
+
+        function handleAnswer(selectedIndex) {
+            const q = questionsDatabase[gameState.currentQuestionIndex];
+            const isCorrect = selectedIndex === q.correct;
+
+            const optionsContainer = document.getElementById('quiz-options');
+            if (optionsContainer) {
+                const buttons = optionsContainer.getElementsByTagName('button');
+                for (let btn of buttons) {
+                    btn.disabled = true;
+                }
+                
+                const explanationTitle = document.getElementById('explanation-title');
+                const mascotAvatarQuiz = document.getElementById('mascot-avatar-quiz');
+                const mascotSpeech = document.getElementById('mascot-speech');
+                const rewardSpan = document.getElementById('explanation-reward');
+                const explanationText = document.getElementById('explanation-text');
+                const explanationBox = document.getElementById('quiz-explanation-box');
+                const nextActionBtn = document.getElementById('next-action-btn');
+
+                if (isCorrect) {
+                    if (buttons[selectedIndex]) {
+                        buttons[selectedIndex].className = "w-full text-left p-4 bg-emerald-600/40 border-2 border-emerald-500 rounded-2xl font-medium text-emerald-200";
+                    }
+                    gameState.correctCount++;
+                    gameState.xp += 25;
+                    gameState.coins += 10;
+                    
+                    if (mascotAvatarQuiz) mascotAvatarQuiz.innerText = "🎉";
+                    if (mascotSpeech) mascotSpeech.innerText = `"Hebat sekali ${gameState.username}! Jawabanmu benar!"`;
+                    
+                    if (explanationTitle) {
+                        explanationTitle.innerText = "✨ Luar Biasa, Benar!";
+                        explanationTitle.className = "font-bold text-emerald-400 text-base";
+                    }
+                    if (rewardSpan) {
+                        rewardSpan.innerText = "+25 XP | +10 Koin";
+                    }
+                    if (nextActionBtn) {
+                        nextActionBtn.innerText = "Lanjut Misi 🚀";
+                        nextActionBtn.onclick = proceedAfterAnswer;
+                        nextActionBtn.className = "w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 font-bold rounded-xl text-white shadow transition cursor-pointer";
+                    }
+                } else {
+                    if (buttons[selectedIndex]) {
+                        buttons[selectedIndex].className = "w-full text-left p-4 bg-red-600/40 border-2 border-red-500 rounded-2xl font-medium text-red-200";
+                    }
+                    if (buttons[q.correct]) {
+                        buttons[q.correct].className = "w-full text-left p-4 bg-emerald-600/40 border-2 border-emerald-500 rounded-2xl font-medium text-emerald-200";
+                    }
+                    
+                    gameState.lives = Math.max(0, gameState.lives - 1);
+                    if (mascotAvatarQuiz) mascotAvatarQuiz.innerText = "💡";
+                    if (mascotSpeech) mascotSpeech.innerText = `"Belum tepat, ayo perhatikan penjelasannya!"`;
+                    
+                    if (explanationTitle) {
+                        explanationTitle.innerText = "💡 Catatan Materi IPAS:";
+                        explanationTitle.className = "font-bold text-yellow-400 text-base";
+                    }
+                    if (rewardSpan) {
+                        rewardSpan.innerText = `Sisa Nyawa: ❤️ ${gameState.lives}`;
+                    }
+
+                    if (gameState.lives <= 0) {
+                        if (nextActionBtn) {
+                            nextActionBtn.innerText = "Lihat Game Over 💔";
+                            nextActionBtn.onclick = showGameOverScreen;
+                            nextActionBtn.className = "w-full py-2.5 bg-red-600 hover:bg-red-500 font-bold rounded-xl text-white shadow transition cursor-pointer";
+                        }
+                    } else {
+                        if (nextActionBtn) {
+                            nextActionBtn.innerText = "Lanjut Misi 🚀";
+                            nextActionBtn.onclick = proceedAfterAnswer;
+                            nextActionBtn.className = "w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 font-bold rounded-xl text-white shadow transition cursor-pointer";
+                        }
+                    }
+                }
+
+                updateStatsDisplay();
+
+                if (explanationText) explanationText.innerText = q.explanation;
+                if (explanationBox) explanationBox.classList.remove('hidden');
+            }
+        }
+
+        function showGameOverScreen() {
+            hideAllScreens();
+            const screenGameOver = document.getElementById('screen-gameover');
+            if (screenGameOver) screenGameOver.classList.remove('hidden');
+
+            const goProgress = document.getElementById('gameover-progress');
+            const goCoins = document.getElementById('gameover-coins');
+
+            if (goProgress) goProgress.innerText = `Soal ${gameState.currentQuestionIndex + 1} dari 50`;
+            if (goCoins) goCoins.innerText = gameState.coins;
+        }
+
+        function proceedAfterAnswer() {
+            if (gameState.lives <= 0) {
+                showGameOverScreen();
+                return;
+            }
+
+            gameState.currentQuestionIndex++;
+
+            if (gameState.currentQuestionIndex >= questionsDatabase.length) {
+                showVictoryScreen();
+            } else {
+                const nextQIdx = gameState.currentQuestionIndex;
+                const chapObj = chapters.find(c => nextQIdx === c.startIdx);
+                if (chapObj) {
+                    showStoryIntro(chapters.indexOf(chapObj));
+                } else {
+                    loadQuestion();
+                }
+            }
+        }
+
+        function showVictoryScreen() {
+            hideAllScreens();
+            const screenVictory = document.getElementById('screen-victory');
+            if (screenVictory) screenVictory.classList.remove('hidden');
+            
+            const finalXp = document.getElementById('final-xp');
+            const finalCoins = document.getElementById('final-coins');
+            const finalCorrect = document.getElementById('final-correct');
+
+            if (finalXp) finalXp.innerText = gameState.xp;
+            if (finalCoins) finalCoins.innerText = gameState.coins;
+            if (finalCorrect) finalCorrect.innerText = `${gameState.correctCount} / 50`;
+        }
+
+        function updateStatsDisplay() {
+            const statLives = document.getElementById('stat-lives');
+            const statCoins = document.getElementById('stat-coins');
+            const statXp = document.getElementById('stat-xp');
+
+            if (statLives) statLives.innerText = gameState.lives;
+            if (statCoins) statCoins.innerText = gameState.coins;
+            if (statXp) statXp.innerText = gameState.xp;
+        }
+
+        function hideAllScreens() {
+            const screens = ['screen-start', 'screen-story', 'screen-quiz', 'screen-gameover', 'screen-victory'];
+            screens.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+        }
+
+        function resetGame() {
+            gameState = {
+                username: "Penjelajah",
+                lives: 3,
+                coins: 0,
+                xp: 0,
+                currentQuestionIndex: 0,
+                correctCount: 0,
+                audioEnabled: true
+            };
+            const usernameInput = document.getElementById('username-input');
+            if (usernameInput) usernameInput.value = "";
+            const usernameError = document.getElementById('username-error');
+            if (usernameError) usernameError.classList.add('hidden');
+
+            updateStatsDisplay();
+            hideAllScreens();
+            const screenStart = document.getElementById('screen-start');
+            const statusBar = document.getElementById('status-bar');
+            if (screenStart) screenStart.classList.remove('hidden');
+            if (statusBar) statusBar.classList.add('hidden');
+        }
+
+        function toggleAudio() {
+            gameState.audioEnabled = !gameState.audioEnabled;
+            const btn = document.getElementById('audio-btn');
+            if (btn) btn.innerText = gameState.audioEnabled ? "🔊" : "🔇";
+        }
+    </script>
+</body>
+</html>
